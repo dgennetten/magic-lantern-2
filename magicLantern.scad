@@ -3,24 +3,24 @@
 // ==========================================
 
 // 1. Global Lantern Parameters
-light_height = 130;      // Height of the point light source (Z axis)
+light_height = 130;      // Height of the LED point light source (Z axis origin of rays)
 cyl_radius = 35;         // Outer radius of the lantern cylinder
 wall_thickness = 2;      // Thickness of the cylinder wall
 font_name = "Stencil";   // Windows default Stencil font
 $fn = 120;               // Smoothness of 3D curves
 
 // 2. LED Mounting Parameters
-led_diameter = 45;       // Outer diameter of physical LED light fixture
-base_depth = 15;         // How deep the light inserts into the top base
+led_diameter = 72.5;       // Outer diameter of physical LED light fixture
+led_recess = 24;         // How far down inside the cylinder top the LED sits
 tolerance = 0.25;        // Clearance for a snug friction fit
 
 // 3. Visualization Toggle
-show_light_rays = false; // MUST BE FALSE for final F6 mesh export!
+show_light_rays = true; // MUST BE FALSE for final F6 mesh export!
 
 // ==========================================
 // 4. RENDER MODE & SVG CONTROLS
 // ==========================================
-render_mode = "SVG";     // Change to "PATTERNS" to use the built-in modules
+render_mode = "PATTERNS";     // Change to "PATTERNS" to use the built-in modules
 
 svg_filename = "my_pattern.svg"; // Must be in the same folder as this .scad file
 svg_scale = 1.0;         // Tweak this since OpenSCAD cannot auto-scale
@@ -83,23 +83,17 @@ module project_circles(z_height, n, duty=0.5) {
 }
 
 module all_2d_patterns() {
-    // The Mode Router
     if (render_mode == "PATTERNS") {
-        
         project_rays(z_height = 15, bar_h = width_24 * 4, n = 24, duty = 0.5);
         project_circles(z_height = 35, n = 24, duty = 0.5);
         project_text(z_height = 55, msg = "ONLY THE SUN KNOWS TRUE TIME", t_size = 5.5, kerning_deg = 11);
         project_rays(z_height = 75, bar_h = width_12, n = 12, duty = 0.5);
         project_circles(z_height = 90, n = 24, duty = 0.5);
         project_rays(z_height = 105, bar_h = width_24 * 4, n = 24, duty = 0.5);
-        
     } else if (render_mode == "SVG") {
-        
-        // Custom SVG Handler
         translate([svg_x_offset, svg_y_offset])
             scale([svg_scale, svg_scale])
                 import(svg_filename);
-                
     } else {
         echo("ERROR: render_mode must be 'PATTERNS' or 'SVG'");
     }
@@ -108,36 +102,39 @@ module all_2d_patterns() {
 // ==========================================
 // 3D LANTERN COMPONENTS
 // ==========================================
-module led_base() {
+module lantern_body() {
     fit_radius = (led_diameter / 2) + tolerance;
     lip_thickness = 3; 
     lip_width = 4;
     
-    translate([0, 0, light_height - base_depth]) {
-        difference() {
-            cylinder(h = base_depth, r = cyl_radius);
-            translate([0, 0, lip_thickness])
-                cylinder(h = base_depth, r = fit_radius);
-            translate([0, 0, -0.1])
-                cylinder(h = base_depth + 0.2, r = fit_radius - lip_width);
-            translate([0, 0, base_depth - 2])
-                cylinder(h = 2.1, r1 = fit_radius, r2 = fit_radius + 1.5);
-        }
-    }
-}
+    // The physical top of the lantern is the light origin PLUS the recess depth
+    total_height = light_height + led_recess;
 
-module lantern_body() {
+    // Scale math to avoid the tip singularity during extrusion
     extrude_h = light_height - 5;
     extrude_scale = (light_height - extrude_h) / light_height;
 
     difference() {
-        // Main hollow cylinder
-        difference() {
-            cylinder(h = light_height - base_depth + 0.1, r = cyl_radius);
-            translate([0, 0, -0.1]) 
-                cylinder(h = light_height - base_depth + 0.3, r = cyl_radius - wall_thickness);
-        }
+        // 1. Solid Master Cylinder
+        cylinder(h = total_height, r = cyl_radius);
+        
+        // 2. Main Inner Lantern Void (Stops just below the LED lip)
+        translate([0, 0, -0.1]) 
+            cylinder(h = light_height - lip_thickness + 0.1, r = cyl_radius - wall_thickness);
 
+        // 3. The LED Cavity (Starts at light_height, goes to the top)
+        translate([0, 0, light_height])
+            cylinder(h = led_recess + 0.1, r = fit_radius);
+            
+        // 4. The Lip Aperture (Hole connecting the LED to the void)
+        translate([0, 0, light_height - lip_thickness - 0.1])
+            cylinder(h = lip_thickness + 0.2, r = fit_radius - lip_width);
+            
+        // 5. Chamfer for easy LED insertion at the very top
+        translate([0, 0, total_height - 2])
+            cylinder(h = 2.1, r1 = fit_radius, r2 = fit_radius + 1.5);
+
+        // 6. Extrude the 2D patterns
         linear_extrude(height = extrude_h, scale = extrude_scale) {
             all_2d_patterns();
         }
@@ -149,7 +146,6 @@ module lantern_body() {
 // ==========================================
 color("DarkSlateGray") {
     lantern_body();
-    led_base();
 }
 
 if (show_light_rays) {
