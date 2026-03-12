@@ -5,7 +5,7 @@ A parametric OpenSCAD project for generating 3D-printable projection lanterns. T
 
 ## Features
 
-* **Parametric LED Mounting:** Easily adjust variables to friction-fit any standard LED puck or light fixture.
+* **Parametric LED Mounting:** Easily adjust variables to friction-fit any standard LED puck or light fixture. Search for "Solar Light Replacement Top 4 Pack (Top Size 3.15 inch, Bottom Size 2.83 inch)" on Amazon.
 * **Distortion-Corrected Projection:** Uses dynamic scaling to ensure patterns projecting further out maintain their intended visual proportions.
 * **Multiple Render Modes**: 
   * `PATTERNS`: Generates a fully customizable array of text, geometric shapes, and rays.
