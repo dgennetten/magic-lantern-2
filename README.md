@@ -14,7 +14,7 @@ A parametric OpenSCAD project for generating 3D-printable projection lanterns. T
 
 ## Prerequisites
 
-1. **OpenSCAD:** Download the latest version from [openscad.org](https://openscad.org/).
+1. **OpenSCAD:** Download the latest version from [openscad.org](https://openscad.org/). For best results, download the Nightly Build version, not the 'current' 2021 version.
 2. **Allerta Stencil Font:** The `PATTERNS` mode relies on this specific font to ensure physical text cutouts don't result in floating, unprintable islands. 
    * Download the `AllertaStencil-Regular.ttf` file and place it in the same directory as `magicLantern.scad`.
    * *Note: The script references the logical font name `"Allerta Stencil"`. Ensure it is properly installed on your system or placed in the local working directory.*
