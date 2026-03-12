@@ -5,7 +5,7 @@ A parametric OpenSCAD project for generating 3D-printable projection lanterns. T
 
 ## Features
 
-* **Parametric LED Mounting:** Easily adjust variables to friction-fit any standard LED puck or light source.
+* **Parametric LED Mounting:** Easily adjust variables to friction-fit any standard LED puck or light source. Code currently configured for these: https://www.amazon.com/dp/B0BYSY98F6?th=1
 * **Distortion-Corrected Projection:** Uses dynamic scaling to ensure patterns projecting further out maintain their intended visual proportions.
 * **Multiple Render Modes:** * `PATTERNS`: Generates a fully customizable array of text, geometric shapes, and rays.
 * `SVG`: Extrudes a custom vector file.
