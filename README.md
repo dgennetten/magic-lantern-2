@@ -1,5 +1,6 @@
 # Modular Projection Lantern Generator
 
+![Sun illustration](Screensjot.jpg)
 A parametric OpenSCAD project for generating 3D-printable projection lanterns. This generator calculates the precise extrusion angles required to cast undistorted 2D patterns, shapes, and text onto a floor or surface from an elevated point light source.
 
 ## Features
