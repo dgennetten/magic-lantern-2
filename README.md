@@ -43,13 +43,20 @@ If using `PATTERNS` mode, scroll down to the `all_2d_patterns()` module. You can
 
 **Universal Parameters**
 * **`distance`** *(Required)*: Determines the vertical placement of the pattern cut.
-* **`phase_shift`** *(Optional, default: 0)*: Applies a rotational offset to the entire pattern ring. Useful for staggering elements between rows.
+* **`phase_shift`** *(Optional, default: 0)*: Rotational offset for the whole ring. **Units depend on the module:** for `project_rays`, `project_circles`, and `project_polygon`, the offset is `phase_shift × (360/n)` degrees; for `project_text`, it is `phase_shift × kerning_deg` (see **`project_text()`** below).
 
-**`project_text()`**
+**`project_text()`**  
+Places text on a ring using one glyph per character and a fixed angular step. The arc is centered on **12 o’clock** (top) or **6 o’clock** (bottom) when `phase_shift` is `0`. You can call `project_text()` twice—once with `location = "top"` and once with `location = "bottom"`—for two lines at opposite sides of the cylinder.
+
+* **`distance`** *(Required)*: Vertical placement of the cut (same meaning as other pattern modules).
 * **`msg`** *(Required)*: The string of text to project.
-* **`t_size`** *(Optional, default: 8)*: The physical font size of the characters on the cylinder.
-* **`kerning_deg`** *(Optional, default: 12)*: The degrees of rotation between each individual character.
-* **`f_name`** *(Optional, default: font_name)*: Overrides the global font choice for a specific text ring.
+* **`t_size`** *(Optional, default: 8)*: Font size for each character on the 2D pattern.
+* **`kerning_deg`** *(Optional, default: 12)*: Degrees of rotation between successive character centers.
+* **`f_name`** *(Optional, default: `font_name`)*: Font name passed to OpenSCAD’s `text()` for that ring.
+* **`phase_shift`** *(Optional, default: 0)*: Extra rotation in **multiples of `kerning_deg`** (not raw degrees). With `0`, the midpoint of the string sits at noon (top) or 6 o’clock (bottom), depending on `location`. Use small fractional values (e.g. `0.25`) for fine optical alignment—spacing is angular, not true glyph width.
+* **`location`** *(Optional, default: `"top"`)*:
+  * **`"top"`**: Arc centered at **noon**; string runs **clockwise** from the first character’s side of the arc.
+  * **`"bottom"`**: Arc centered at **6 o’clock**; string runs **counter-clockwise**, with glyphs kept right-side up on the lower half of the ring.
 
 **`project_polygon()`**
 * **`vertex`** *(Required)*: The number of sides for the shape (e.g., `4` for squares/diamonds).
