@@ -154,8 +154,9 @@ module all_2d_patterns() {
 // ==========================================
 module lantern_body() {
     fit_radius = (led_diameter / 2) + tolerance;
-    lip_thickness = 3; 
-    lip_width = 4;
+    // Slight Z overlap between inner void and LED cavity avoids coplanar faces at light_height
+    // (fixes phantom sheet in preview / bad STL facets).
+    merge_eps = 0.05;
     
     total_height = light_height + led_recess;
     // Auto-shorten the cylinder by 50mm if doing a Calibration print
@@ -170,25 +171,22 @@ module lantern_body() {
             // 1. Solid Master Cylinder (Shortened for CAL mode)
             translate([0, 0, cyl_bottom_z])
                 cylinder(h = total_height - cyl_bottom_z, r = cyl_radius);
-            // 2. Main Inner Lantern Void
+            // 2. Main Inner Lantern Void (full height to LED plane — no inner lip)
             translate([0, 0, cyl_bottom_z - 0.1]) 
-                cylinder(h = light_height - lip_thickness - cyl_bottom_z + 0.1, r = cyl_radius - wall_thickness);
-            // 3. The LED Cavity 
-            translate([0, 0, light_height])
-                cylinder(h = led_recess + 0.1, r = fit_radius);
-            // 4. The Lip Aperture 
-            translate([0, 0, light_height - lip_thickness - 0.1])
-                cylinder(h = lip_thickness + 0.2, r = fit_radius - lip_width);
-            // 5. Chamfer for easy LED insertion
+                cylinder(h = light_height - cyl_bottom_z + 0.1 + merge_eps, r = cyl_radius - wall_thickness);
+            // 3. The LED Cavity (starts slightly below light_height to merge booleans with void)
+            translate([0, 0, light_height - merge_eps])
+                cylinder(h = led_recess + 0.1 + merge_eps, r = fit_radius);
+            // 4. Chamfer for easy LED insertion
             translate([0, 0, total_height - 2])
                 cylinder(h = 2.1, r1 = fit_radius, r2 = fit_radius + 1.5);
-            // 6. Extrude the 2D patterns
+            // 5. Extrude the 2D patterns
             linear_extrude(height = extrude_h, scale = extrude_scale) {
                 all_2d_patterns();
             }
         }
         
-        // 7. Mounting Tabs (Flush with the bottom edge)
+        // 6. Mounting Tabs (Flush with the bottom edge)
         tab_r = 10;
         hole_r = 2.5;
         tab_h = 3;
