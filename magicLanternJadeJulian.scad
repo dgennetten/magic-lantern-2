@@ -153,8 +153,7 @@ module all_2d_patterns() {
 // ==========================================
 module lantern_body() {
     fit_radius = (led_diameter / 2) + tolerance;
-    // Slight Z overlap between inner void and LED cavity avoids coplanar faces at light_height
-    // (fixes phantom sheet in preview / bad STL facets).
+    // LED cavity starts slightly below light_height to avoid a coplanar face with the bore (preview/STL).
     merge_eps = 0.05;
     
     total_height = light_height + led_recess;
@@ -170,9 +169,10 @@ module lantern_body() {
             // 1. Solid Master Cylinder (Shortened for CAL mode)
             translate([0, 0, cyl_bottom_z])
                 cylinder(h = total_height - cyl_bottom_z, r = cyl_radius);
-            // 2. Main Inner Lantern Void (full height to LED plane — no inner lip)
+            // 2. Main inner bore through full cylinder height (must reach past light_height: fit_radius
+            //    is smaller than cyl_radius - wall_thickness, or a solid ring remains in the LED zone).
             translate([0, 0, cyl_bottom_z - 0.1]) 
-                cylinder(h = light_height - cyl_bottom_z + 0.1 + merge_eps, r = cyl_radius - wall_thickness);
+                cylinder(h = total_height - cyl_bottom_z + 0.1, r = cyl_radius - wall_thickness);
             // 3. The LED Cavity (starts slightly below light_height to merge booleans with void)
             translate([0, 0, light_height - merge_eps])
                 cylinder(h = led_recess + 0.1 + merge_eps, r = fit_radius);
