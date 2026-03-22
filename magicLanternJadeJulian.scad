@@ -3,7 +3,7 @@
 // ==========================================
 
 // 1. Global Lantern Parameters
-light_height = 55;
+light_height = 70;
 // Height of the LED point light source (Z axis origin)
 cyl_radius = 40;
 // Outer radius of the lantern cylinder
@@ -127,14 +127,16 @@ module project_cal_spiral(start_r=75, end_r=300, dots=37, dot_size=5) {
 
 module all_2d_patterns() {
     if (render_mode == "PATTERNS") {
-        // Distances recalculated from 130mm light_height to maintain exact visual placement
-        project_text(distance = 35, msg = "JADE & JULIAN'S", t_size = 15, kerning_deg = 13, location = "top");
-        project_text(distance = 35, msg = "BEDROOM", t_size = 15, kerning_deg = 13, location = "bottom");
         // Diamonds (vertex=4, rot=0)
-        project_polygon(distance = 24, vertex = 4, rot = 0, n = 20, duty = 0.5);
+        project_polygon(distance = 55, vertex = 4, rot = 0, n = 20, duty = 0.5);
         // Diamonds (vertex=4, rot=0, phase_shift=.5)
-        project_polygon(distance = 27, vertex = 4, rot = 0, n = 20, duty = 0.5, phase_shift = 0.5);
-        project_circles(distance = 18, n = 20, duty = 0.75);
+        project_polygon(distance = 48, vertex = 4, rot = 0, n = 20, duty = 0.5, phase_shift = 0.5);
+        // Distances recalculated from 130mm light_height to maintain exact visual placement
+        project_text(distance = 34.5, msg = "JADE & JULIAN'S", t_size = 22, kerning_deg = 14, location = "top");
+        project_text(distance = 34.5, msg = "BEDROOM", t_size = 22, kerning_deg = 14, location = "bottom");
+        project_circles(distance = 25, n = 20, duty = 0.75);
+        project_rays(distance = 20, bar_h = width_24 * 2, n = 20, duty = 0.75);
+        project_circles(distance = 14.5, n = 20, duty = 0.75);
 
     } else if (render_mode == "SVG") {
         translate([svg_x_offset, svg_y_offset])
