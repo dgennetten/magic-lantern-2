@@ -38,14 +38,14 @@ svg_y_offset = 0;
 function layer_text(distance, msg, t_size = 8, kerning_deg = 12, phase_shift = 0, location = "top") =
     ["text", distance, msg, t_size, kerning_deg, phase_shift, location];
 
-function layer_rays(distance, bar_h, n, duty = 0.5, phase_shift = 0) =
-    ["rays", distance, bar_h, n, duty, phase_shift];
+function layer_rays(distance, bar_h, n, duty = 0.5, phase_shift = 0, count = 0) =
+    ["rays", distance, bar_h, n, duty, phase_shift, count];
 
-function layer_circles(distance, n, duty = 0.5, phase_shift = 0) =
-    ["circles", distance, n, duty, phase_shift];
+function layer_circles(distance, n, duty = 0.5, phase_shift = 0, count = 0) =
+    ["circles", distance, n, duty, phase_shift, count];
 
-function layer_polygon(distance, vertex, rot = 0, n = 24, duty = 0.5, phase_shift = 0) =
-    ["polygon", distance, vertex, rot, n, duty, phase_shift];
+function layer_polygon(distance, vertex, rot = 0, n = 24, duty = 0.5, phase_shift = 0, count = 0) =
+    ["polygon", distance, vertex, rot, n, duty, phase_shift, count];
 
 // ---------------------------------------------------------------------------
 // 4. Pattern stack — main customization: reorder or edit entries here
@@ -57,9 +57,9 @@ pattern_spec = [
     layer_text(65, "DIANA", t_size = 12, kerning_deg = 12, location = "bottom"),
     layer_polygon(44, vertex = 4, rot = 0, n = 20, duty = 0.5, phase_shift = 0.5),
     layer_polygon(49, vertex = 4, rot = 0, n = 20, duty = 0.5),
-    layer_circles(35, n = 20, duty = 0.75),
-    layer_rays(25, bar_h = _ray_bar_w * 4, n = 20, duty = 0.75),
-    layer_circles(14.5, n = 20, duty = 0.75),
+    layer_circles(35, n = 20, duty = 0.75, count = 10),
+    layer_rays(25, bar_h = _ray_bar_w * 4, n = 20, duty = 0.75, count = 10),
+    layer_circles(14.5, n = 20, duty = 0.75, count = 10),
 ];
 
 // ---------------------------------------------------------------------------
@@ -91,7 +91,7 @@ module project_text(distance, msg, t_size = 8, kerning_deg = 12, f_name = font_n
     }
 }
 
-module project_rays(distance, bar_h, n, duty = 0.5, phase_shift = 0) {
+module project_rays(distance, bar_h, n, duty = 0.5, phase_shift = 0, count = 0) {
     dist_top = distance - (bar_h / 2);
     dist_bottom = distance + (bar_h / 2);
     r_outer = get_floor_r(dist_top);
@@ -99,8 +99,10 @@ module project_rays(distance, bar_h, n, duty = 0.5, phase_shift = 0) {
     angle_step = 360 / n;
     wedge_angle = angle_step * duty;
     angle_offset = angle_step * phase_shift;
-    for (i = [0 : n - 1]) {
-        rotate(i * angle_step + angle_offset)
+    actual_count = (count > 0 && count <= n) ? count : n;
+    rot_sign = (count > 0) ? -1 : 1;
+    for (i = [0 : actual_count - 1]) {
+        rotate(rot_sign * i * angle_step + angle_offset)
             polygon([
                 [ r_inner * tan(wedge_angle / 2), r_inner ],
                 [ r_outer * tan(wedge_angle / 2), r_outer ],
@@ -110,25 +112,29 @@ module project_rays(distance, bar_h, n, duty = 0.5, phase_shift = 0) {
     }
 }
 
-module project_circles(distance, n, duty = 0.5, phase_shift = 0) {
+module project_circles(distance, n, duty = 0.5, phase_shift = 0, count = 0) {
     floor_r = get_floor_r(distance);
     angle_step = 360 / n;
     c_r = floor_r * sin((angle_step * duty) / 2);
     angle_offset = angle_step * phase_shift;
-    for (i = [0 : n - 1]) {
-        rotate(i * angle_step + angle_offset)
+    actual_count = (count > 0 && count <= n) ? count : n;
+    rot_sign = (count > 0) ? -1 : 1;
+    for (i = [0 : actual_count - 1]) {
+        rotate(rot_sign * i * angle_step + angle_offset)
             translate([0, floor_r])
                 circle(r = c_r);
     }
 }
 
-module project_polygon(distance, vertex, rot = 0, n = 24, duty = 0.5, phase_shift = 0) {
+module project_polygon(distance, vertex, rot = 0, n = 24, duty = 0.5, phase_shift = 0, count = 0) {
     floor_r = get_floor_r(distance);
     angle_step = 360 / n;
     p_r = floor_r * sin((angle_step * duty) / 2);
     angle_offset = angle_step * phase_shift;
-    for (i = [0 : n - 1]) {
-        rotate(i * angle_step + angle_offset)
+    actual_count = (count > 0 && count <= n) ? count : n;
+    rot_sign = (count > 0) ? -1 : 1;
+    for (i = [0 : actual_count - 1]) {
+        rotate(rot_sign * i * angle_step + angle_offset)
             translate([0, floor_r])
                 rotate(90 - rot)
                     circle(r = p_r, $fn = vertex);
@@ -162,14 +168,16 @@ module apply_pattern_entry(entry) {
             bar_h = entry[2],
             n = entry[3],
             duty = entry[4],
-            phase_shift = entry[5]
+            phase_shift = entry[5],
+            count = entry[6]
         );
     } else if (kind == "circles") {
         project_circles(
             distance = entry[1],
             n = entry[2],
             duty = entry[3],
-            phase_shift = entry[4]
+            phase_shift = entry[4],
+            count = entry[5]
         );
     } else if (kind == "polygon") {
         project_polygon(
@@ -178,7 +186,8 @@ module apply_pattern_entry(entry) {
             rot = entry[3],
             n = entry[4],
             duty = entry[5],
-            phase_shift = entry[6]
+            phase_shift = entry[6],
+            count = entry[7]
         );
     } else {
         echo("Unknown pattern entry kind: ", kind);
