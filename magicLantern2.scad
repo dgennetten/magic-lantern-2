@@ -9,6 +9,8 @@
 light_height = 90;           // LED height (Z origin for projection math)
 cyl_radius = 40;
 wall_thickness = 2;
+//font_name = "Boston Traffic";
+//use <boston_traffic.ttf>;
 font_name = "Allerta Stencil";
 use <AllertaStencil-Regular.ttf>;
 $fn = 120;
@@ -16,6 +18,9 @@ $fn = 120;
 led_diameter = 72.5;
 led_recess = 24;
 tolerance = 0.25;
+
+// Mount style: "tabs" (two interior screw tabs) or "flange" (full disc, 1" centre hole)
+mount_style = "flange";
 
 // ---------------------------------------------------------------------------
 // 2. What to render on the floor plane
@@ -50,8 +55,8 @@ _ray_bar_w = (2 * PI * cyl_radius / 24) * 0.5;
 pattern_spec = [
     layer_text(65, "WELCOME HOME", t_size = 12, kerning_deg = 12, location = "top"),
     layer_text(65, "DIANA", t_size = 12, kerning_deg = 12, location = "bottom"),
-    layer_polygon(44, vertex = 4, rot = 0, n = 20, duty = 0.5),
-    layer_polygon(49, vertex = 4, rot = 0, n = 20, duty = 0.5, phase_shift = 0.5),
+    layer_polygon(44, vertex = 4, rot = 0, n = 20, duty = 0.5, phase_shift = 0.5),
+    layer_polygon(49, vertex = 4, rot = 0, n = 20, duty = 0.5),
     layer_circles(35, n = 20, duty = 0.75),
     layer_rays(25, bar_h = _ray_bar_w * 4, n = 20, duty = 0.75),
     layer_circles(14.5, n = 20, duty = 0.75),
@@ -220,23 +225,33 @@ module lantern_body() {
                 all_2d_patterns();
         }
 
-        tab_r = 10;
-        hole_r = 2.5;
         tab_h = 3;
-        offset_y = 30;
         translate([0, 0, cyl_bottom_z]) {
-            difference() {
-                intersection() {
-                    union() {
-                        translate([0, offset_y, 0]) cylinder(h = tab_h, r = tab_r);
-                        translate([-tab_r, offset_y, 0]) cube([tab_r * 2, cyl_radius - offset_y, tab_h]);
-                        translate([0, -offset_y, 0]) cylinder(h = tab_h, r = tab_r);
-                        translate([-tab_r, -cyl_radius, 0]) cube([tab_r * 2, cyl_radius - offset_y, tab_h]);
-                    }
+            if (mount_style == "flange") {
+                flange_hole_r = 25.4 / 2;   // 1-inch centre hole
+                difference() {
                     cylinder(h = tab_h, r = cyl_radius);
+                    translate([0, 0, -0.1])
+                        cylinder(h = tab_h + 0.2, r = flange_hole_r);
                 }
-                translate([0, offset_y, -0.1]) cylinder(h = tab_h + 0.2, r = hole_r);
-                translate([0, -offset_y, -0.1]) cylinder(h = tab_h + 0.2, r = hole_r);
+            } else {
+                // Default: two interior screw tabs
+                tab_r   = 10;
+                hole_r  = 2.5;
+                offset_y = 30;
+                difference() {
+                    intersection() {
+                        union() {
+                            translate([0, offset_y, 0]) cylinder(h = tab_h, r = tab_r);
+                            translate([-tab_r, offset_y, 0]) cube([tab_r * 2, cyl_radius - offset_y, tab_h]);
+                            translate([0, -offset_y, 0]) cylinder(h = tab_h, r = tab_r);
+                            translate([-tab_r, -cyl_radius, 0]) cube([tab_r * 2, cyl_radius - offset_y, tab_h]);
+                        }
+                        cylinder(h = tab_h, r = cyl_radius);
+                    }
+                    translate([0, offset_y, -0.1]) cylinder(h = tab_h + 0.2, r = hole_r);
+                    translate([0, -offset_y, -0.1]) cylinder(h = tab_h + 0.2, r = hole_r);
+                }
             }
         }
     }
