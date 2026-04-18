@@ -6,7 +6,7 @@
 // ---------------------------------------------------------------------------
 // 1. Lantern & LED (physical)
 // ---------------------------------------------------------------------------
-light_height = 90;           // LED height (Z origin for projection math)
+light_height = 90;           // See `light_height_is_to_rim` below
 cyl_radius = 40;
 wall_thickness = 2;
 //font_name = "Boston Traffic";
@@ -16,8 +16,16 @@ use <AllertaStencil-Regular.ttf>;
 $fn = 120;
 
 led_diameter = 72.5;
-led_recess = 24;
+led_recess = 24;             // Pocket depth from outside rim down toward the LED
 tolerance = 0.25;
+
+// How `light_height` is measured (floor at z = 0):
+// - false (default): floor → LED emit plane. Rim height = light_height + led_recess. Recess only sizes the lid.
+// - true: floor → outside rim. LED emit plane = light_height - led_recess (recess enters projection math).
+light_height_is_to_rim = false;
+
+function projection_led_height() = light_height_is_to_rim ? (light_height - led_recess) : light_height;
+function lantern_rim_height() = light_height_is_to_rim ? light_height : (light_height + led_recess);
 
 // Mount style: "tabs" (two interior screw tabs) or "flange" (full disc, 1" centre hole)
 mount_style = "flange";
@@ -70,7 +78,7 @@ show_light_rays = true;   // set false for F6 export
 // ---------------------------------------------------------------------------
 // 6. Projection math & 2D primitives
 // ---------------------------------------------------------------------------
-function get_floor_r(distance) = (light_height * cyl_radius) / distance;
+function get_floor_r(distance) = (projection_led_height() * cyl_radius) / distance;
 
 module project_text(distance, msg, t_size = 8, kerning_deg = 12, f_name = font_name, phase_shift = 0, location = "top") {
     floor_r = get_floor_r(distance);
@@ -215,10 +223,11 @@ module all_2d_patterns() {
 module lantern_body() {
     fit_radius = (led_diameter / 2) + tolerance;
     merge_eps = 0.05;
-    total_height = light_height + led_recess;
+    led_z = projection_led_height();
+    total_height = lantern_rim_height();
     cyl_bottom_z = (render_mode == "CAL") ? 50 : 0;
-    extrude_h = light_height - 5;
-    extrude_scale = (light_height - extrude_h) / light_height;
+    extrude_h = led_z - 5;
+    extrude_scale = (led_z - extrude_h) / led_z;
 
     union() {
         difference() {
@@ -226,7 +235,7 @@ module lantern_body() {
                 cylinder(h = total_height - cyl_bottom_z, r = cyl_radius);
             translate([0, 0, cyl_bottom_z - 0.1])
                 cylinder(h = total_height - cyl_bottom_z + 0.1, r = cyl_radius - wall_thickness);
-            translate([0, 0, light_height - merge_eps])
+            translate([0, 0, led_z - merge_eps])
                 cylinder(h = led_recess + 0.1 + merge_eps, r = fit_radius);
             translate([0, 0, total_height - 2])
                 cylinder(h = 2.1, r1 = fit_radius, r2 = fit_radius + 1.5);
@@ -278,6 +287,6 @@ if (show_light_rays) {
             linear_extrude(height = 0.5)
                 all_2d_patterns();
     color("Yellow", 0.2)
-        linear_extrude(height = light_height - 5, scale = 5 / light_height)
+        linear_extrude(height = projection_led_height() - 5, scale = 5 / projection_led_height())
             all_2d_patterns();
 }

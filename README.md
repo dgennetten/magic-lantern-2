@@ -37,9 +37,11 @@ Place `AllertaStencil-Regular.ttf` next to whichever `.scad` file you open (see 
 
 Open **`magicLantern2.scad`** (or your chosen file). Under **Lantern & LED (physical)**, set:
 
-* `light_height` — from the bottom of the lantern to the LED.
+* `light_height` — vertical reference from the bottom of the lantern (floor projection plane, z = 0). Meaning is controlled by `light_height_is_to_rim` (in `magicLantern2.scad` / `magicLantern3.scad`):
+  * **`light_height_is_to_rim = false` (default):** `light_height` is floor → **LED emit plane**. The outside rim is `light_height + led_recess`. Changing `led_recess` only deepens the pocket above the LED; projection math uses `light_height` only.
+  * **`light_height_is_to_rim = true`:** `light_height` is floor → **outside rim**. The LED emit plane is `light_height - led_recess`, and that value drives projection (`get_floor_r`, taper extrusion, ray preview).
 * `cyl_radius`, `wall_thickness` — shell size.
-* `led_diameter`, `led_recess`, `tolerance` — friction fit for the puck.
+* `led_diameter`, `led_recess`, `tolerance` — friction fit for the puck (`led_recess` = depth of the pocket from the rim toward the LED).
 
 ### 2. Choose render mode
 

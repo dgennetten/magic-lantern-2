@@ -4,7 +4,7 @@
 
 // 1. Global Lantern Parameters
 light_height = 90;
-// Height of the LED point light source (Z axis origin)
+// Meaning depends on `light_height_is_to_rim` (floor at z = 0)
 cyl_radius = 40;
 // Outer radius of the lantern cylinder
 wall_thickness = 2;      // Thickness of the cylinder wall
@@ -17,9 +17,15 @@ $fn = 120;               // Smoothness of 3D curves
 led_diameter = 72.5;
 // Outer diameter of physical LED light fixture
 led_recess = 24;
-// How far down inside the cylinder top the LED sits
+// Pocket depth from outside rim down toward the LED (how far the emit plane sits below the rim)
 tolerance = 0.25;
 // Clearance for a snug friction fit
+
+// false: `light_height` = floor → LED (rim = light_height + led_recess). true: `light_height` = floor → rim, LED = light_height - led_recess
+light_height_is_to_rim = false;
+
+function projection_led_height() = light_height_is_to_rim ? (light_height - led_recess) : light_height;
+function lantern_rim_height() = light_height_is_to_rim ? light_height : (light_height + led_recess);
 
 // 3. Visualization Toggle
 show_light_rays = true;
@@ -38,7 +44,7 @@ svg_y_offset = 0;
 width_24 = (2 * PI * cyl_radius / 24) * 0.5;
 width_12 = (2 * PI * cyl_radius / 12) * 0.5;
 // REFACTORED: Calculates floor radius based on distance down from the LED
-function get_floor_r(distance) = (light_height * cyl_radius) / distance;
+function get_floor_r(distance) = (projection_led_height() * cyl_radius) / distance;
 
 // ==========================================
 // 2D FLOOR PATTERN MODULES
@@ -157,13 +163,14 @@ module lantern_body() {
     // LED cavity starts slightly below light_height to avoid a coplanar face with the bore (preview/STL).
     merge_eps = 0.05;
     
-    total_height = light_height + led_recess;
+    led_z = projection_led_height();
+    total_height = lantern_rim_height();
     // Auto-shorten the cylinder by 50mm if doing a Calibration print
     cyl_bottom_z = (render_mode == "CAL") ? 50 : 0;
 
     // Scale math to avoid the tip singularity during extrusion
-    extrude_h = light_height - 5;
-    extrude_scale = (light_height - extrude_h) / light_height;
+    extrude_h = led_z - 5;
+    extrude_scale = (led_z - extrude_h) / led_z;
 
     union() {
         difference() {
@@ -174,8 +181,8 @@ module lantern_body() {
             //    is smaller than cyl_radius - wall_thickness, or a solid ring remains in the LED zone).
             translate([0, 0, cyl_bottom_z - 0.1]) 
                 cylinder(h = total_height - cyl_bottom_z + 0.1, r = cyl_radius - wall_thickness);
-            // 3. The LED Cavity (starts slightly below light_height to merge booleans with void)
-            translate([0, 0, light_height - merge_eps])
+            // 3. The LED Cavity (starts slightly below LED plane to merge booleans with void)
+            translate([0, 0, led_z - merge_eps])
                 cylinder(h = led_recess + 0.1 + merge_eps, r = fit_radius);
             // 4. Chamfer for easy LED insertion
             translate([0, 0, total_height - 2])
@@ -228,6 +235,6 @@ if (show_light_rays) {
         linear_extrude(height = 0.5)
             all_2d_patterns();
     color("Yellow", 0.2)
-        linear_extrude(height = light_height - 5, scale = 5 / light_height)
+        linear_extrude(height = projection_led_height() - 5, scale = 5 / projection_led_height())
             all_2d_patterns();
 }

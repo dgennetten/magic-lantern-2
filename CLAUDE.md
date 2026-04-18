@@ -28,9 +28,9 @@ Requires: OpenSCAD (nightly build recommended) + `AllertaStencil-Regular.ttf` in
 
 ### Core Math
 
-`get_floor_r(distance)` is the projection formula used everywhere:
+`get_floor_r(distance)` is the projection formula used everywhere (numerator is `projection_led_height()`, equal to `light_height` when `light_height_is_to_rim` is false):
 ```
-floor_radius = (light_height * cyl_radius) / distance
+floor_radius = (projection_led_height * cyl_radius) / distance
 ```
 `distance` is the vertical position of a cut on the cylinder wall (measured from the top/LED). Smaller distance = higher on wall = projects **farther** from center on the floor. This similar-triangles calculation is what makes the projection geometrically correct.
 
@@ -52,14 +52,15 @@ Controlled by `render_mode` variable:
 ### Key Parameters
 
 ```
-light_height    — distance from bottom of lantern to LED (drives all projection math)
-cyl_radius      — outer radius of cylinder
-wall_thickness  — shell thickness
-led_diameter    — friction-fit bore for LED puck
-led_recess      — depth of LED cavity
-tolerance       — dimensional tolerance for fit
-$fn             — smoothness (120 for print-ready)
-show_light_rays — set false before STL export
+light_height           — floor (z=0) reference height; default mode: floor → LED (drives projection). See light_height_is_to_rim
+light_height_is_to_rim — false: rim = light_height + led_recess. true: light_height is floor → rim; projection uses light_height - led_recess
+cyl_radius             — outer radius of cylinder
+wall_thickness         — shell thickness
+led_diameter           — friction-fit bore for LED puck
+led_recess             — pocket depth from rim toward LED
+tolerance              — dimensional tolerance for fit
+$fn                    — smoothness (120 for print-ready)
+show_light_rays        — set false before STL export
 ```
 
 ### Adding New Pattern Primitives
