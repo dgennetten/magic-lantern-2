@@ -8,7 +8,7 @@
 // ---------------------------------------------------------------------------
 // LED / shell (inch → mm): inner Ø 2.4"; LED emit plane 0.95" below outside rim.
 inch = 25.4;
-led_inner_d_in = 2.4;        // required inner Ø (LED friction bore = main shell inner Ø)
+led_inner_d_in = 2.95;        // required inner Ø (LED friction bore = main shell inner Ø)
 led_depth_from_rim_in = 0.95;   // rim → LED; pattern taper ends at `extrude_tip_clearance_mm` below LED plane
 
 light_height = 60;           // See `light_height_is_to_rim` below (floor → LED emit plane)
@@ -68,17 +68,22 @@ function layer_polygon(distance, vertex, rot = 0, n = 24, duty = 0.5, phase_shif
 _ray_bar_w = (2 * PI * cyl_radius / 24) * 0.5;
 
 pattern_spec = [
-        layer_text(24, "BREATHE THE AIR", t_size = 22, kerning_deg = 13, location = "top", phase_shift=-7),
+        layer_text(22, "BREATHE THE AIR", t_size = 28, kerning_deg = 13, location = "top", phase_shift=-6.9),
  
     layer_circles(38, n = 20, duty = 0.65, count = 11),
-    layer_rays(12, bar_h = _ray_bar_w * 3.0, n = 20, duty = 0.65, count = 11),
-    layer_circles(6, n = 20, duty = 0.65, count = 11),
+    layer_rays(10.5, bar_h = _ray_bar_w * 1.9, n = 20, duty = 0.65, count = 11),
+    layer_polygon(5.6, 4,0,n = 20, duty = 0.65, count = 11),
+    layer_polygon(5.3, 4,0,n = 20, duty = 0.55, count = 11),
+    layer_polygon(4.99, 4,0,n = 20, duty = 0.45, count = 11),
+    layer_polygon(4.75, 4,0,n = 20, duty = 0.35, count = 11),
+    layer_polygon(4.56, 4,0,n = 20, duty = 0.25, count = 11),
+    layer_polygon(15.4, 4,0,n = 20, duty = 0.65, count = 11),
 ];
 
 // ---------------------------------------------------------------------------
 // 5. Preview
 // ---------------------------------------------------------------------------
-show_light_rays = true;   // set false for F6 export
+show_light_rays = true;   // set false for F6 export <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 // ---------------------------------------------------------------------------
 // 6. Projection math & 2D primitives
