@@ -35,7 +35,7 @@ function projection_led_height() = light_height_is_to_rim ? (light_height - led_
 function lantern_rim_height() = light_height_is_to_rim ? light_height : (light_height + led_recess);
 
 // Mount style: "tabs" (two interior screw tabs) or "flange" (full disc, 1" centre hole)
-mount_style = "flange";
+mount_style = "tabs";
 
 // ---------------------------------------------------------------------------
 // 2. What to render on the floor plane
